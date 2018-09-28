@@ -1,4 +1,4 @@
-# AnsibleFest 2018 - Ansible for Networks: Distributed Denial of Service Mitigation
+# AnsibleFest 2018 - Ansible for Network Distributed Denial of Service Mitigation
 Files related to AnsibleFest 2018 Session https://agenda.fest.ansible.com/SessionDetail.aspx?id=498179
 
 This repository contains the files for the demonstration of the AnsibleFest 2018 session titled **Ansible for Networks: Distributed Denial of Service Mitigation**. Please let us know your thoughts in the comments below!!
