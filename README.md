@@ -9,11 +9,11 @@ You can find the VIRL topology file as well as the device configuration in this 
 
 The lab topology involved with video 1 to 6 are listed here: 
 
-[placeholder]
+![alt text](https://github.com/a10networks/ansiblefest2018/blob/master/Topology_Scenario_1.png "Topology 1")
 
 The lab topology involved with video 7 for on-premise mitigation is here: 
 
-[placeholder]
+![alt text](https://github.com/a10networks/ansiblefest2018/blob/master/Topology_Scenario_2.png "Topology 1")
 
 ### 1. Lab Topology
 
@@ -66,7 +66,9 @@ FastNetMon has built-in ExaBGP support for Flowspec announcement (and RTBH capab
 In the second scenario, we will program a DDoS scrubbing device on-premise. The device is sitting off to the side without being involved in the normal traffic flow. When attack happens, the scrubbing device will announce the prefix via BGP to redirect the particular traffic toward itself and pass back the clean traffic. Note: 
 
 - The scrubbing devices is an A10 TPS device with AxAPI v3. 
-- I am using a custom module that you can find in this repository. We are using the cli.deploy capability that executes any CLI commands on the device.  
+- I am using a custom module that you can find in this repository. We are using the cli.deploy capability that executes any CLI commands on the device. You can find the module under the library directory. 
+- The playbook is bgp_on_ram.yml. 
+- We are assuming the mitigation configuration was already configured, we only need to advertise the BGP host route in order to on-ramp the traffic. 
 
 [![7. On-Premise DDoS Scrubbing](https://img.youtube.com/vi/ITQdyr549pw/0.jpg)](https://www.youtube.com/watch?v=ITQdyr549pw&index=3&t=0s&list=PLAaTeRWIM_wsuW1jO0BE9gbZvvgqDZTIK)
 
