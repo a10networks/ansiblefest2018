@@ -1,0 +1,11 @@
+---
+- name: Test Playbook
+  hosts: "Customer-Edge"
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+    - name: show version
+      ios_command:
+        commands: show version
+

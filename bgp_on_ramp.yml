@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  user: echou
+  connection: local
+
+  tasks:
+      - name: AXAPIv3 Cli.Deploy Module
+        action: cli_deploy host="192.168.199.152" username="admin1" password="a10" commands="router bgp 64513, network 1.1.1.1, wr mem"
+        register: output
+
+      - debug: msg="{{ output.msg }}”
+

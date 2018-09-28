@@ -1,0 +1,15 @@
+---
+- name: add ban source to flowspec
+  hosts: "flowspec-server"
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+    - name: add ban source
+      iosxr_config:
+        lines:
+          - no match source-address ipv4
+          - match source-address ipv4 {{ lookup('env', 'ban_ip') }} 255.255.255.255
+        parents: class-map type traffic match-all bad_sources
+        replace: line
+

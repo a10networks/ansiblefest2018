@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.95" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.95/virl.xsd">
+    <extensions>
+        <entry key="management_network" type="String">flat</entry>
+    </extensions>
+    <node name="flowspec-server" type="SIMPLE" subtype="IOS XRv" location="501,238" ipv4="192.168.0.10">
+        <extensions>
+            <entry key="config" type="string">!  IOS-XR Config generated on 2018-09-27 13:44
+! by autonetkit_0.24.0
+!
+hostname flowspec-server
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain lookup disable
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+domain name virl.info
+ssh server v2
+ssh server vrf Mgmt-intf
+!
+line template vty
+timestamp
+exec-timeout 720 0
+!
+line console
+exec-timeout 0 0
+!
+line default
+exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+!
+interface Loopback0
+  description Loopback
+  ipv4 address 192.168.0.10 255.255.255.255
+!
+interface GigabitEthernet0/0/0/0
+  description to Provider-Upstream
+  ipv4 address 10.0.0.2 255.255.255.252
+  no shutdown
+!
+interface GigabitEthernet0/0/0/1
+  description to Customer-Edge
+  ipv4 address 10.1.0.1 255.255.255.252
+  no shutdown
+!
+interface mgmteth0/0/CPU0/0
+  description OOB Management
+  ! Configured on launch
+  vrf Mgmt-intf
+  no ipv4 address
+  no shutdown
+!
+!
+router ospf 2
+  log adjacency changes
+  area 0
+    interface GigabitEthernet0/0/0/1
+      cost 1
+    !
+    interface Loopback0
+      passive enable
+    !
+  !
+!
+route-policy bgp_in
+  pass
+end-policy
+!
+route-policy bgp_out
+  pass
+end-policy
+!
+route-policy ibgp_in
+  pass
+end-policy
+!
+router static
+  address-family ipv4 unicast
+    10.1.0.0 255.255.255.248 Null0 254
+    10.1.128.0 255.255.255.252 Null0 254
+  !
+!
+router bgp 2
+  bgp router-id 192.168.0.10
+  address-family ipv4 unicast
+    network 192.168.0.10/32
+    network 10.1.0.0/29
+    network 10.1.128.0/30
+  !
+! iBGP
+!
+! iBGP peers
+  !
+  neighbor 192.168.0.9
+    description iBGP peer Customer-Edge
+    remote-as 2
+    update-source Loopback0
+    address-family ipv4 unicast
+      next-hop-self
+    !
+    !
+! eBGP peers
+  !
+  neighbor 10.0.0.1
+    description eBGP peer Provider-Upstream
+    remote-as 1
+    address-family ipv4 unicast
+      send-community-ebgp
+      route-policy bgp_in in
+      route-policy bgp_out out
+      next-hop-self
+!
+        </entry>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="AutoNetkit.ASN" type="Integer">2</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.2" netPrefixLenV4="30"/>
+        <interface id="1" name="GigabitEthernet0/0/0/1" ipv4="10.1.0.1" netPrefixLenV4="30"/>
+    </node>
+    <node name="Provider-Upstream" type="SIMPLE" subtype="IOSv" location="287,214" ipv4="192.168.0.4">
+        <extensions>
+            <entry key="config" type="string">! IOS Config generated on 2018-09-27 13:44
+! by autonetkit_0.24.0
+!
+hostname Provider-Upstream
+boot-start-marker
+boot-end-marker
+!
+vrf definition Mgmt-intf
+!
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+!
+!
+no aaa new-model
+!
+!
+ip cef
+ipv6 unicast-routing
+ipv6 cef
+!
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+no service config
+enable password cisco
+ip classless
+ip subnet-zero
+no ip domain lookup
+ip domain name virl.info
+crypto key generate rsa modulus 768
+ip ssh server algorithm authentication password
+username cisco privilege 15 secret cisco
+line vty 0 4
+ transport input ssh telnet
+ exec-timeout 720 0
+ password cisco
+ login local
+line con 0
+ password cisco
+!
+no cdp run
+!
+!
+interface Loopback0
+  description Loopback
+  ip address 192.168.0.4 255.255.255.255
+!
+interface GigabitEthernet0/0
+  description OOB Management
+  vrf forwarding Mgmt-intf
+  ! Configured on launch
+  no ip address
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/1
+  description to Customer-Edge
+  ip address 10.0.0.5 255.255.255.252
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/2
+  description to Transit-3
+  ip address 10.0.128.6 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/3
+  description to flowspec-server
+  ip address 10.0.0.1 255.255.255.252
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/4
+  description GigabitEthernet0/4
+  no ip address
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/5
+  description GigabitEthernet0/5
+  no ip address
+  duplex full
+  speed auto
+  no shutdown
+!
+!
+!
+router ospf 1
+  network 192.168.0.4 0.0.0.0 area 0
+  log-adjacency-changes
+  passive-interface Loopback0
+  network 10.0.128.4 0.0.0.3 area 0
+!
+!
+router bgp 1
+  bgp router-id 192.168.0.4
+  no synchronization
+! ibgp
+  ! ibgp peers
+  !
+  neighbor 192.168.0.3 remote-as 1
+  neighbor 192.168.0.3 description iBGP peer Transit-3
+  neighbor 192.168.0.3 update-source Loopback0
+!
+! ebgp
+  !
+  neighbor 10.0.0.6 remote-as 2
+  neighbor 10.0.0.6 description eBGP to Customer-Edge
+  !
+  neighbor 10.0.0.2 remote-as 2
+  neighbor 10.0.0.2 description eBGP to flowspec-server
+!
+!
+ !
+ address-family ipv4
+  network 192.168.0.4 mask 255.255.255.255
+  network 10.0.0.0 mask 255.255.255.240
+  network 10.0.128.4 mask 255.255.255.252
+  neighbor 192.168.0.3 activate
+  neighbor 192.168.0.3 next-hop-self
+  neighbor 10.0.0.6 activate
+  neighbor 10.0.0.6 send-community
+  neighbor 10.0.0.6 next-hop-self
+  neighbor 10.0.0.2 activate
+  neighbor 10.0.0.2 send-community
+  neighbor 10.0.0.2 next-hop-self
+ exit-address-family
+!
+!
+ip route 10.0.0.0 255.255.255.240 Null0 254
+ip route 10.0.128.4 255.255.255.252 Null0 254
+!
+end</entry>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="AutoNetkit.ibgp_role" type="String">Peer</entry>
+            <entry key="AutoNetkit.ASN" type="Integer">1</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/1" ipv4="10.0.0.5" netPrefixLenV4="30"/>
+        <interface id="1" name="GigabitEthernet0/2" ipv4="10.0.128.6" netPrefixLenV4="30"/>
+        <interface id="2" name="GigabitEthernet0/3" ipv4="10.0.0.1" netPrefixLenV4="30"/>
+        <interface id="3" name="GigabitEthernet0/4"/>
+        <interface id="4" name="GigabitEthernet0/5"/>
+    </node>
+    <node name="Customer-Edge" type="SIMPLE" subtype="IOSv" location="289,327" ipv4="192.168.0.9">
+        <extensions>
+            <entry key="config" type="string">! IOS Config generated on 2018-09-27 13:44
+! by autonetkit_0.24.0
+!
+hostname Customer-Edge
+boot-start-marker
+boot-end-marker
+!
+vrf definition Mgmt-intf
+!
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+!
+!
+no aaa new-model
+!
+!
+ip cef
+ipv6 unicast-routing
+ipv6 cef
+!
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+no service config
+enable password cisco
+ip classless
+ip subnet-zero
+no ip domain lookup
+ip domain name virl.info
+crypto key generate rsa modulus 768
+ip ssh server algorithm authentication password
+username cisco privilege 15 secret cisco
+line vty 0 4
+ transport input ssh telnet
+ exec-timeout 720 0
+ password cisco
+ login local
+line con 0
+ password cisco
+!
+no cdp run
+!
+!
+interface Loopback0
+  description Loopback
+  ip address 192.168.0.9 255.255.255.255
+!
+interface GigabitEthernet0/0
+  description OOB Management
+  vrf forwarding Mgmt-intf
+  ! Configured on launch
+  no ip address
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/1
+  description to Provider-Upstream
+  ip address 10.0.0.6 255.255.255.252
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/2
+  description to Server
+  ip address 10.1.0.5 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/3
+  description to flowspec-server
+  ip address 10.1.0.2 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/4
+  description to lxc-iperf-2
+  ip address 10.1.128.2 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+!
+!
+router ospf 2
+  network 192.168.0.9 0.0.0.0 area 0
+  log-adjacency-changes
+  passive-interface Loopback0
+  network 10.1.0.4 0.0.0.3 area 0
+  network 10.1.0.0 0.0.0.3 area 0
+  network 10.1.128.0 0.0.0.3 area 0
+!
+!
+router bgp 2
+  bgp router-id 192.168.0.9
+  no synchronization
+! ibgp
+  ! ibgp peers
+  !
+  neighbor 192.168.0.10 remote-as 2
+  neighbor 192.168.0.10 description iBGP peer flowspec-server
+  neighbor 192.168.0.10 update-source Loopback0
+!
+! ebgp
+  !
+  neighbor 10.0.0.5 remote-as 1
+  neighbor 10.0.0.5 description eBGP to Provider-Upstream
+!
+!
+ !
+ address-family ipv4
+  network 192.168.0.9 mask 255.255.255.255
+  network 10.1.0.0 mask 255.255.255.248
+  network 10.1.128.0 mask 255.255.255.252
+  neighbor 192.168.0.10 activate
+  neighbor 192.168.0.10 next-hop-self
+  neighbor 10.0.0.5 activate
+  neighbor 10.0.0.5 send-community
+  neighbor 10.0.0.5 next-hop-self
+ exit-address-family
+!
+!
+ip route 10.1.0.0 255.255.255.248 Null0 254
+ip route 10.1.128.0 255.255.255.252 Null0 254
+!
+end</entry>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="AutoNetkit.ASN" type="Integer">2</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/1" ipv4="10.0.0.6" netPrefixLenV4="30"/>
+        <interface id="1" name="GigabitEthernet0/2" ipv4="10.1.0.5" netPrefixLenV4="30"/>
+        <interface id="2" name="GigabitEthernet0/3" ipv4="10.1.0.2" netPrefixLenV4="30"/>
+        <interface id="3" name="GigabitEthernet0/4" ipv4="10.1.128.2" netPrefixLenV4="30"/>
+    </node>
+    <node name="Server" type="SIMPLE" subtype="server" location="383,423">
+        <extensions>
+            <entry key="config" type="string">#cloud-config
+bootcmd:
+- ln -s -t /etc/rc.d /etc/rc.local
+hostname: Server
+manage_etc_hosts: true
+runcmd:
+- start ttyS0
+- systemctl start getty@ttyS0.service
+- systemctl start rc-local
+- sed -i '/^\s*PasswordAuthentication\s\+no/d' /etc/ssh/sshd_config
+- echo "UseDNS no" &gt;&gt; /etc/ssh/sshd_config
+- service ssh restart
+- service sshd restart
+users:
+- default
+- gecos: User configured by VIRL Configuration Engine 0.23.10
+  lock-passwd: false
+  name: cisco
+  plain-text-passwd: cisco
+  shell: /bin/bash
+  ssh-authorized-keys:
+  - VIRL-USER-SSH-PUBLIC-KEY
+  sudo: ALL=(ALL) ALL
+write_files:
+- path: /etc/init/ttyS0.conf
+  owner: root:root
+  content: |
+    # ttyS0 - getty
+    # This service maintains a getty on ttyS0 from the point the system is
+    # started until it is shut down again.
+    start on stopped rc or RUNLEVEL=[12345]
+    stop on runlevel [!12345]
+    respawn
+    exec /sbin/getty -L 115200 ttyS0 vt102
+  permissions: '0644'
+- path: /etc/systemd/system/dhclient@.service
+  content: |
+    [Unit]
+    Description=Run dhclient on %i interface
+    After=network.target
+    [Service]
+    Type=oneshot
+    ExecStart=/sbin/dhclient %i -pf /var/run/dhclient.%i.pid -lf /var/lib/dhclient/dhclient.%i.lease
+    RemainAfterExit=yes
+  owner: root:root
+  permissions: '0644'
+- path: /etc/rc.local
+  owner: root:root
+  permissions: '0755'
+  content: |-
+    #!/bin/sh
+    ifconfig eth1 up 10.1.0.6 netmask 255.255.255.252
+    route add -host 192.168.0.3 gw 10.1.0.5 dev eth1
+    route add -host 192.168.0.4 gw 10.1.0.5 dev eth1
+    route add -host 192.168.0.9 gw 10.1.0.5 dev eth1
+    route add -host 192.168.0.10 gw 10.1.0.5 dev eth1
+    route add -net 10.0.0.0/28 gw 10.1.0.5 dev eth1
+    route add -net 10.0.128.4/30 gw 10.1.0.5 dev eth1
+    route add -net 10.1.0.0/29 gw 10.1.0.5 dev eth1
+    route add -net 10.1.128.0/30 gw 10.1.0.5 dev eth1
+    exit 0
+</entry>
+            <entry key="AutoNetkit.ASN" type="Integer">2</entry>
+        </extensions>
+        <interface id="0" name="eth1" ipv4="10.1.0.6" netPrefixLenV4="30"/>
+    </node>
+    <node name="Transit-3" type="SIMPLE" subtype="IOSv" location="278,117" ipv4="192.168.0.3">
+        <extensions>
+            <entry key="config" type="string">! IOS Config generated on 2018-09-27 13:44
+! by autonetkit_0.24.0
+!
+hostname Transit-3
+boot-start-marker
+boot-end-marker
+!
+vrf definition Mgmt-intf
+!
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+!
+!
+no aaa new-model
+!
+!
+ip cef
+ipv6 unicast-routing
+ipv6 cef
+!
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+no service config
+enable password cisco
+ip classless
+ip subnet-zero
+no ip domain lookup
+ip domain name virl.info
+crypto key generate rsa modulus 768
+ip ssh server algorithm authentication password
+username cisco privilege 15 secret cisco
+line vty 0 4
+ transport input ssh telnet
+ exec-timeout 720 0
+ password cisco
+ login local
+line con 0
+ password cisco
+!
+no cdp run
+!
+!
+interface Loopback0
+  description Loopback
+  ip address 192.168.0.3 255.255.255.255
+!
+interface GigabitEthernet0/0
+  description OOB Management
+  vrf forwarding Mgmt-intf
+  ! Configured on launch
+  no ip address
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/1
+  description to Provider-Upstream
+  ip address 10.0.128.5 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/2
+  description to Client
+  ip address 10.0.0.9 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+interface GigabitEthernet0/3
+  description to lxc-iperf-1
+  ip address 10.0.0.14 255.255.255.252
+  ip ospf cost 1
+  duplex full
+  speed auto
+  no shutdown
+!
+!
+!
+router ospf 1
+  network 192.168.0.3 0.0.0.0 area 0
+  log-adjacency-changes
+  passive-interface Loopback0
+  network 10.0.128.4 0.0.0.3 area 0
+  network 10.0.0.8 0.0.0.3 area 0
+  network 10.0.0.12 0.0.0.3 area 0
+!
+!
+router bgp 1
+  bgp router-id 192.168.0.3
+  no synchronization
+! ibgp
+  ! ibgp peers
+  !
+  neighbor 192.168.0.4 remote-as 1
+  neighbor 192.168.0.4 description iBGP peer Provider-Upstream
+  neighbor 192.168.0.4 update-source Loopback0
+!
+!
+ !
+ address-family ipv4
+  network 192.168.0.3 mask 255.255.255.255
+  neighbor 192.168.0.4 activate
+ exit-address-family
+!
+!
+!
+end</entry>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/1" ipv4="10.0.128.5" netPrefixLenV4="30"/>
+        <interface id="1" name="GigabitEthernet0/2" ipv4="10.0.0.9" netPrefixLenV4="30"/>
+        <interface id="2" name="GigabitEthernet0/3" ipv4="10.0.0.14" netPrefixLenV4="30"/>
+    </node>
+    <node name="Client" type="SIMPLE" subtype="server" location="119,139">
+        <extensions>
+            <entry key="config" type="string">#cloud-config
+bootcmd:
+- ln -s -t /etc/rc.d /etc/rc.local
+hostname: Client
+manage_etc_hosts: true
+runcmd:
+- start ttyS0
+- systemctl start getty@ttyS0.service
+- systemctl start rc-local
+- sed -i '/^\s*PasswordAuthentication\s\+no/d' /etc/ssh/sshd_config
+- echo "UseDNS no" &gt;&gt; /etc/ssh/sshd_config
+- service ssh restart
+- service sshd restart
+users:
+- default
+- gecos: User configured by VIRL Configuration Engine 0.23.10
+  lock-passwd: false
+  name: cisco
+  plain-text-passwd: cisco
+  shell: /bin/bash
+  ssh-authorized-keys:
+  - VIRL-USER-SSH-PUBLIC-KEY
+  sudo: ALL=(ALL) ALL
+write_files:
+- path: /etc/init/ttyS0.conf
+  owner: root:root
+  content: |
+    # ttyS0 - getty
+    # This service maintains a getty on ttyS0 from the point the system is
+    # started until it is shut down again.
+    start on stopped rc or RUNLEVEL=[12345]
+    stop on runlevel [!12345]
+    respawn
+    exec /sbin/getty -L 115200 ttyS0 vt102
+  permissions: '0644'
+- path: /etc/systemd/system/dhclient@.service
+  content: |
+    [Unit]
+    Description=Run dhclient on %i interface
+    After=network.target
+    [Service]
+    Type=oneshot
+    ExecStart=/sbin/dhclient %i -pf /var/run/dhclient.%i.pid -lf /var/lib/dhclient/dhclient.%i.lease
+    RemainAfterExit=yes
+  owner: root:root
+  permissions: '0644'
+- path: /etc/rc.local
+  owner: root:root
+  permissions: '0755'
+  content: |-
+    #!/bin/sh
+    ifconfig eth2 down
+    ifconfig eth1 up 10.0.0.10 netmask 255.255.255.252
+    route add -host 192.168.0.3 gw 10.0.0.9 dev eth1
+    route add -host 192.168.0.4 gw 10.0.0.9 dev eth1
+    route add -host 192.168.0.9 gw 10.0.0.9 dev eth1
+    route add -host 192.168.0.10 gw 10.0.0.9 dev eth1
+    route add -net 10.0.0.0/28 gw 10.0.0.9 dev eth1
+    route add -net 10.0.128.4/30 gw 10.0.0.9 dev eth1
+    route add -net 10.1.0.0/29 gw 10.0.0.9 dev eth1
+    route add -net 10.1.128.0/30 gw 10.0.0.9 dev eth1
+    exit 0
+</entry>
+        </extensions>
+        <interface id="0" name="eth1" ipv4="10.0.0.10" netPrefixLenV4="30"/>
+        <interface id="1" name="eth2"/>
+    </node>
+    <node name="lxc-iperf-1" type="SIMPLE" subtype="lxc-iperf" location="157,49">
+        <extensions>
+            <entry key="config" type="string">#cloud-config
+bootcmd:
+- ln -s -t /etc/rc.d /etc/rc.local
+hostname: lxc-iperf-1
+manage_etc_hosts: true
+runcmd:
+- systemctl start rc-local
+- sed -i '/^\s*PasswordAuthentication\s\+no/d' /etc/ssh/sshd_config
+- echo "UseDNS no" &gt;&gt; /etc/ssh/sshd_config
+- service ssh restart
+- service sshd restart
+users:
+- default
+- gecos: User configured by VIRL Configuration Engine 0.23.10
+  lock-passwd: false
+  name: cisco
+  plain-text-passwd: cisco
+  shell: /bin/bash
+  ssh-authorized-keys:
+  - VIRL-USER-SSH-PUBLIC-KEY
+  sudo: ALL=(ALL) ALL
+write_files:
+- path: /etc/systemd/system/dhclient@.service
+  content: |
+    [Unit]
+    Description=Run dhclient on %i interface
+    After=network.target
+    [Service]
+    Type=oneshot
+    ExecStart=/sbin/dhclient %i -pf /var/run/dhclient.%i.pid -lf /var/lib/dhclient/dhclient.%i.lease
+    RemainAfterExit=yes
+  owner: root:root
+  permissions: '0644'
+- path: /etc/rc.local
+  owner: root:root
+  permissions: '0755'
+  content: |-
+    #!/bin/sh
+    ifconfig eth1 up 10.0.0.13 netmask 255.255.255.252
+    route add -host 192.168.0.3 gw 10.0.0.14 dev eth1
+    route add -host 192.168.0.4 gw 10.0.0.14 dev eth1
+    route add -host 192.168.0.9 gw 10.0.0.14 dev eth1
+    route add -host 192.168.0.10 gw 10.0.0.14 dev eth1
+    route add -net 10.0.0.0/28 gw 10.0.0.14 dev eth1
+    route add -net 10.0.128.4/30 gw 10.0.0.14 dev eth1
+    route add -net 10.1.0.0/29 gw 10.0.0.14 dev eth1
+    route add -net 10.1.128.0/30 gw 10.0.0.14 dev eth1
+    exit 0
+</entry>
+        </extensions>
+        <interface id="0" name="eth1" ipv4="10.0.0.13" netPrefixLenV4="30"/>
+    </node>
+    <node name="lxc-iperf-2" type="SIMPLE" subtype="lxc-iperf" location="529,407">
+        <extensions>
+            <entry key="config" type="string">#cloud-config
+bootcmd:
+- ln -s -t /etc/rc.d /etc/rc.local
+hostname: lxc-iperf-2
+manage_etc_hosts: true
+runcmd:
+- systemctl start rc-local
+- sed -i '/^\s*PasswordAuthentication\s\+no/d' /etc/ssh/sshd_config
+- echo "UseDNS no" &gt;&gt; /etc/ssh/sshd_config
+- service ssh restart
+- service sshd restart
+users:
+- default
+- gecos: User configured by VIRL Configuration Engine 0.23.10
+  lock-passwd: false
+  name: cisco
+  plain-text-passwd: cisco
+  shell: /bin/bash
+  ssh-authorized-keys:
+  - VIRL-USER-SSH-PUBLIC-KEY
+  sudo: ALL=(ALL) ALL
+write_files:
+- path: /etc/systemd/system/dhclient@.service
+  content: |
+    [Unit]
+    Description=Run dhclient on %i interface
+    After=network.target
+    [Service]
+    Type=oneshot
+    ExecStart=/sbin/dhclient %i -pf /var/run/dhclient.%i.pid -lf /var/lib/dhclient/dhclient.%i.lease
+    RemainAfterExit=yes
+  owner: root:root
+  permissions: '0644'
+- path: /etc/rc.local
+  owner: root:root
+  permissions: '0755'
+  content: |-
+    #!/bin/sh
+    ifconfig eth1 up 10.1.128.1 netmask 255.255.255.252
+    route add -host 192.168.0.3 gw 10.1.128.2 dev eth1
+    route add -host 192.168.0.4 gw 10.1.128.2 dev eth1
+    route add -host 192.168.0.9 gw 10.1.128.2 dev eth1
+    route add -host 192.168.0.10 gw 10.1.128.2 dev eth1
+    route add -net 10.0.0.0/28 gw 10.1.128.2 dev eth1
+    route add -net 10.0.128.4/30 gw 10.1.128.2 dev eth1
+    route add -net 10.1.0.0/29 gw 10.1.128.2 dev eth1
+    route add -net 10.1.128.0/30 gw 10.1.128.2 dev eth1
+    exit 0
+</entry>
+        </extensions>
+        <interface id="0" name="eth1" ipv4="10.1.128.1" netPrefixLenV4="30"/>
+    </node>
+    <annotations/>
+    <connection dst="/virl:topology/virl:node[3]/virl:interface[1]" src="/virl:topology/virl:node[2]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[4]/virl:interface[1]" src="/virl:topology/virl:node[3]/virl:interface[2]"/>
+    <connection dst="/virl:topology/virl:node[2]/virl:interface[3]" src="/virl:topology/virl:node[1]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[3]/virl:interface[3]" src="/virl:topology/virl:node[1]/virl:interface[2]"/>
+    <connection dst="/virl:topology/virl:node[2]/virl:interface[2]" src="/virl:topology/virl:node[5]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[5]/virl:interface[2]" src="/virl:topology/virl:node[6]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[5]/virl:interface[3]" src="/virl:topology/virl:node[7]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[3]/virl:interface[4]" src="/virl:topology/virl:node[8]/virl:interface[1]"/>
+</topology>
