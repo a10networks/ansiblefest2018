@@ -5,6 +5,8 @@ This repository contains the files for the demonstration of the AnsibleFest 2018
 
 If you are the impatient kind, skip to the bottom of the page for the combined video for the demonstration. However, since there is no narratives involved in the video, I personally feel it is better to watch the videos one-by-one in the order listed below. 
 
+For the DDoS detector in the topology, we use the community version of FastNetMon. It receives NetFlow v5 from the edge router on the customer site. FastNetMon is a high performance DDoS detector built by Pavel Odintsov (https://github.com/pavel-odintsov). They offer both a commercial and community version, you can find more information about it https://fastnetmon.com/. 
+
 You can find the VIRL topology file as well as the device configuration in this repository. 
 
 The lab topology involved with video 1 to 6 are listed here: 
