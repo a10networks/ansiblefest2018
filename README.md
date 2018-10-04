@@ -74,6 +74,16 @@ In the second scenario, we will program a DDoS scrubbing device on-premise. The 
 
 [![7. On-Premise DDoS Scrubbing](https://img.youtube.com/vi/ITQdyr549pw/0.jpg)](https://www.youtube.com/watch?v=ITQdyr549pw&index=3&t=0s&list=PLAaTeRWIM_wsuW1jO0BE9gbZvvgqDZTIK)
 
+### (Extra) Bonus: more detailed A10 Integration
+
+1. Someone at AnsibleFest asked about a more detail description on the A10 integration. Here is a more detailed screencast for an on-premise A10 TPS scrubbing (a bit dated): 
+
+[![Bonus 1. On-Premise DDoS Scrubbing](https://img.youtube.com/vi/8aMO5u64WbA/0.jpg)](https://www.youtube.com/watch?v=8aMO5u64WbA)
+
+2. FastNetMon with Ubuntu 18.04 installation is straight forward with APT. However, for installation on other platforms or with previous Ubuntu releases, here is a video showing the installation steps: 
+
+[![Bonus 2. FastNetMon Installation (non-Ubuntu 18.04)](https://img.youtube.com/vi/seyKAIvZ7a0/0.jpg)](https://www.youtube.com/watch?v=seyKAIvZ7a0)
+
 
 ### Combined Videos
 
