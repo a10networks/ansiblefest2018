@@ -1,6 +1,11 @@
 # AnsibleFest 2018 - Ansible for Network Distributed Denial of Service Mitigation
 Files related to AnsibleFest 2018 Session https://agenda.fest.ansible.com/SessionDetail.aspx?id=498179
 
+**If you find the topic of DDoS of interest to you, you can download the related O'Reilly book in the following links:**
+- [A10 Networks](https://www.a10networks.com/resources/ebooks/distributed-denial-service-ddos)
+- [O'Reilly](https://www.oreilly.com/security/free/distributed-denial-of-service.csp)
+- [Book Related code](https://github.com/oreillymedia/distributed_denial_of_service_ddos)
+
 This repository contains the files for the demonstration of the AnsibleFest 2018 session titled **Ansible for Network Distributed Denial of Service Mitigation**. Please let us know your thoughts in the comments below!!
 
 If you are the impatient kind, skip to the bottom of the page for the combined video for the demonstration. However, since there is no narratives involved in the video, I personally feel it is better to watch the videos one-by-one in the order listed below. 
